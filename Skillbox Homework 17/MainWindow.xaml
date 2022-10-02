@@ -18,7 +18,7 @@
             <ColumnDefinition Width="195*"/>
             <ColumnDefinition Width="36*"/>
         </Grid.ColumnDefinitions>
-        <Button Name="buttonJournal"  Content="Журнал" Grid.Column="2" HorizontalAlignment="Left" Margin="25,20,0,0" Grid.Row="1" VerticalAlignment="Top" Width="142"/>
+        <Button Name="buttonJournal"  Content="Журнал" Grid.Column="2" HorizontalAlignment="Left" Margin="25,20,0,0" Grid.Row="1" VerticalAlignment="Top" Width="142" Click="ButtonJournalClick"/>
         <DataGrid Grid.Column="1" Grid.Row="1"/>
 
     </Grid>

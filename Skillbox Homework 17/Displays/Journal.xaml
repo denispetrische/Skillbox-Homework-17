@@ -17,10 +17,10 @@
             <ColumnDefinition Width="100*"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <ListView Grid.Column="1" Grid.Row="1">
+        <ListView Name="listview" Grid.Column="1" Grid.Row="1">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn/>
+                    <GridViewColumn Header="Сообщение:" DisplayMemberBinding="{Binding}"/>
                 </GridView>
             </ListView.View>
         </ListView>

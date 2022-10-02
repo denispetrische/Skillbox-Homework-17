@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data.OleDb;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Collections.ObjectModel;
+using Skillbox_Homework_17.Displays;
 
 namespace Skillbox_Homework_17
 {
@@ -22,6 +25,16 @@ namespace Skillbox_Homework_17
     /// </summary>
     public partial class MainWindow : Window
     {
+        Journal journalWindow;
+
+        Thread threadLocalDB = new Thread(ConnectLocalDB);
+        Thread threadMSAccess = new Thread(ConnectMSAccess);
+
+        public delegate void InformationHandler(string message);
+        public static event InformationHandler? Notify;
+
+        ObservableCollection<string> notifications = new ObservableCollection<string>();
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -31,11 +44,13 @@ namespace Skillbox_Homework_17
 
         private void Preset()
         {
-            ConnectLocalDB();
-            ConnectMSAccess();
+            Notify += AddJournalString;
+
+            threadLocalDB.Start();
+            threadMSAccess.Start();
         }
 
-        private void ConnectLocalDB()
+        private static void ConnectLocalDB()
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder()
             {
@@ -49,7 +64,7 @@ namespace Skillbox_Homework_17
 
             SqlConnection connectionLocalDB = new SqlConnection(connectionString.ConnectionString);
 
-            connectionLocalDB.StateChange += (s, e) => { MessageBox.Show($"{nameof(connectionLocalDB)} has changed state to: {(s as SqlConnection).State}"); };
+            connectionLocalDB.StateChange += (s, e) => { Notify?.Invoke($"{nameof(connectionLocalDB)} has changed state to: {(s as SqlConnection).State}"); };
 
             try
             {
@@ -57,7 +72,7 @@ namespace Skillbox_Homework_17
             }
             catch (Exception e)
             {
-                MessageBox.Show($"{e.Message}");
+                Notify?.Invoke($"{e.Message}");
             }
             finally
             {
@@ -65,13 +80,13 @@ namespace Skillbox_Homework_17
             }
         }
 
-        private void ConnectMSAccess()
+        private static void ConnectMSAccess()
         {
             string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\DatabaseAccess.mdb";
 
             OleDbConnection connectionMSAccess = new OleDbConnection(connectionString);
 
-            connectionMSAccess.StateChange += (s,e) => { MessageBox.Show($"{nameof(connectionMSAccess)} has changed state to: {(s as OleDbConnection).State}"); };
+            connectionMSAccess.StateChange += (s,e) => { Notify?.Invoke($"{nameof(connectionMSAccess)} has changed state to: {(s as OleDbConnection).State}"); };
          
             try
             {
@@ -79,12 +94,24 @@ namespace Skillbox_Homework_17
             }
             catch (Exception e)
             {
-                MessageBox.Show($"{e.Message}");
+                Notify?.Invoke($"{e.Message}");
             }
             finally
             {
                 connectionMSAccess.Close();
             }
+        }
+
+        private void AddJournalString(string message)
+        {
+            notifications.Add(message);
+        }
+
+        private void ButtonJournalClick(object sender, RoutedEventArgs e)
+        {
+            journalWindow = new Journal();
+            journalWindow.listview.ItemsSource = notifications;
+            journalWindow.Show();
         }
     }
 }
