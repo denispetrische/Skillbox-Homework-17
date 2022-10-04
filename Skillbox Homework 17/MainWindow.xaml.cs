@@ -113,5 +113,25 @@ namespace Skillbox_Homework_17
             journalWindow.listview.ItemsSource = notifications;
             journalWindow.Show();
         }
+
+        private void ButtonAddClientClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ButtonDeleteClientClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ButtonUpdateClientClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ButtonLoginClick(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
