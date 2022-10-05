@@ -133,5 +133,30 @@ namespace Skillbox_Homework_17
         {
 
         }
+
+        private void ButtonLogoutClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuitemShowClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuitemAddClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuitemDeleteClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuitemUpdateClick(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
