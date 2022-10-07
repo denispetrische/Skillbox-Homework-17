@@ -4,6 +4,6 @@
 	Фамилия nvarchar(255) not null,
 	Имя nvarchar(255) not null,
 	Отчество nvarchar(255) not null,
-	[Номер телефона] nvarchar(255),
+	[Номер_телефона] nvarchar(255),
 	Email nvarchar(255) not null,
 )

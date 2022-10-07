@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Data.OleDb;
 using System.Linq;
@@ -27,8 +28,9 @@ namespace Skillbox_Homework_17
     {
         Journal journalWindow;
 
-        Thread threadLocalDB = new Thread(ConnectLocalDB);
-        Thread threadMSAccess = new Thread(ConnectMSAccess);
+        SqlDataAdapter adapterLocalDB;
+        DataRowView somerow;
+        DataTable dataTableLocalDB;
 
         public delegate void InformationHandler(string message);
         public static event InformationHandler? Notify;
@@ -46,11 +48,10 @@ namespace Skillbox_Homework_17
         {
             Notify += AddJournalString;
 
-            threadLocalDB.Start();
-            threadMSAccess.Start();
+            ConnectLocalDB();
         }
 
-        private static void ConnectLocalDB()
+        private void ConnectLocalDB()
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder()
             {
@@ -63,7 +64,37 @@ namespace Skillbox_Homework_17
             };
 
             SqlConnection connectionLocalDB = new SqlConnection(connectionString.ConnectionString);
+            adapterLocalDB = new SqlDataAdapter();
+            dataTableLocalDB = new DataTable();
 
+            string selectScript = @"SELECT * FROM localDBTable Order by localDBTable.ID";
+            adapterLocalDB.SelectCommand = new SqlCommand(selectScript, connectionLocalDB);
+
+            string insertScript = @"INSERT INTO localDBTable {Фамилия, Имя, Отчество, Номер_телефона, Email} VALUES {@Фамилия, @Имя, @Отчество, @Номер_телефона, @Email}; Set @ID = @@IDENTITY";
+            adapterLocalDB.InsertCommand = new SqlCommand(insertScript, connectionLocalDB);
+            adapterLocalDB.InsertCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").Direction = ParameterDirection.Output;
+            adapterLocalDB.InsertCommand.Parameters.Add("@Фамилия", SqlDbType.NVarChar,255, "Фамилия");
+            adapterLocalDB.InsertCommand.Parameters.Add("@Имя", SqlDbType.NVarChar, 255, "Имя");
+            adapterLocalDB.InsertCommand.Parameters.Add("@Отчество", SqlDbType.NVarChar, 255, "Отчество");
+            adapterLocalDB.InsertCommand.Parameters.Add("@Номер_телефона", SqlDbType.NVarChar, 255, "Номер_телефона");
+            adapterLocalDB.InsertCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 255, "Email");
+
+            string updateScript = @"UPDATE localDBTable SET Фамилия = @Фамилия, Имя = @Имя, Отчество = @Отчество, [Номер_телефона] = @Номер_телефона, Email = @Email WHERE ID = @ID";
+            adapterLocalDB.UpdateCommand = new SqlCommand(updateScript, connectionLocalDB);
+            adapterLocalDB.UpdateCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").SourceVersion = DataRowVersion.Original;
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Фамилия", SqlDbType.NVarChar, 255, "Фамилия");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Имя", SqlDbType.NVarChar, 255, "Имя");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Отчество", SqlDbType.NVarChar, 255, "Отчество");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Номер_телефона", SqlDbType.NVarChar, 255, "Номер_телефона");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 255, "Email");
+
+            string deleteScript = @"DELETE FROM localDBTable WHERE ID = @ID";
+            adapterLocalDB.DeleteCommand = new SqlCommand(deleteScript, connectionLocalDB);
+            adapterLocalDB.DeleteCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID");
+
+            adapterLocalDB.Fill(dataTableLocalDB);
+            this.gridview.DataContext = dataTableLocalDB.DefaultView;
+            
             connectionLocalDB.StateChange += (s, e) => { Notify?.Invoke($"{nameof(connectionLocalDB)} has changed state to: {(s as SqlConnection).State}"); };
 
             try
@@ -80,10 +111,9 @@ namespace Skillbox_Homework_17
             }
         }
 
-        private static void ConnectMSAccess()
+        private void ConnectMSAccess()
         {
-            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\DatabaseAccess.mdb";
-
+            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\Bases\Database1.accdb";
             OleDbConnection connectionMSAccess = new OleDbConnection(connectionString);
 
             connectionMSAccess.StateChange += (s,e) => { Notify?.Invoke($"{nameof(connectionMSAccess)} has changed state to: {(s as OleDbConnection).State}"); };
@@ -158,5 +188,27 @@ namespace Skillbox_Homework_17
         {
 
         }
+
+        private void CellEndEditing(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            somerow = (DataRowView)gridview.SelectedItem;
+
+            somerow.BeginEdit();
+        }
+
+        private void CurrentCellChanged(object sender, EventArgs e)
+        {
+            if (somerow == null)
+            {
+                return;
+            }
+            else
+            {
+                somerow.EndEdit();
+                adapterLocalDB.Update(dataTableLocalDB);
+            }
+        }
+
+
     }
 }

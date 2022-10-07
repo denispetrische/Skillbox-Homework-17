@@ -31,15 +31,17 @@
                   ItemsSource="{Binding}"
                   IsReadOnly="False"
                   Margin="0,0,0,0" 
-                  Grid.RowSpan="6" Grid.Column="1" Grid.Row="1">
+                  Grid.RowSpan="6" Grid.Column="1" Grid.Row="1"
+                  CellEditEnding="CellEndEditing"
+                  CurrentCellChanged="CurrentCellChanged">
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding}"/>
-                <DataGridTextColumn Header="Фамилия" Binding="{Binding}"/>
-                <DataGridTextColumn Header="Имя" Binding="{Binding}"/>
-                <DataGridTextColumn Header="Отчество" Binding="{Binding}"/>
-                <DataGridTextColumn Header="Телефон" Binding="{Binding}"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding}"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
+                <DataGridTextColumn Header="Фамилия" Binding="{Binding Фамилия}"/>
+                <DataGridTextColumn Header="Имя" Binding="{Binding Имя}"/>
+                <DataGridTextColumn Header="Отчество" Binding="{Binding Отчество}"/>
+                <DataGridTextColumn Header="Телефон" Binding="{Binding [Номер_телефона]}"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}"/>
             </DataGrid.Columns>
 
             <DataGrid.ContextMenu>
@@ -57,7 +59,7 @@
         <Button x:Name="buttonDeleteClient"  Content="Удалить клиента" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="150" Click="ButtonDeleteClientClick" Margin="25,0,0,12"/>
         <Button x:Name="buttonUpdateClient"  Content="Обновить данные клиента" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="4" VerticalAlignment="Top" Width="150" Click="ButtonUpdateClientClick" Margin="25,0,0,13" Grid.RowSpan="2"/>
         <Button x:Name="buttonLogin"  Content="Войти в систему" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="150" Click="ButtonLoginClick" Margin="25,0,0,13" Grid.RowSpan="2"/>
-        <Button x:Name="buttonLogout"  Content="Выйти" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="6" Width="150" Click="ButtonLogoutClick" Margin="25,0,0,0" Height="20" VerticalAlignment="Top"/>
+        <Button x:Name="buttonLogout"  Content="Выйти из системы" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="6" Width="150" Click="ButtonLogoutClick" Margin="25,0,0,0" Height="20" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
