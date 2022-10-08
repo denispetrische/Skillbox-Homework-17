@@ -57,9 +57,8 @@
         <Button Name="buttonJournal"  Content="Журнал" Grid.Column="2" HorizontalAlignment="Left" Margin="25,0,0,0" VerticalAlignment="Top" Width="150" Click="ButtonJournalClick" Grid.Row="1"/>
         <Button x:Name="buttonAddClient"  Content="Добавить клиента" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Top" Width="150" Click="ButtonAddClientClick" Margin="25,0,0,13" Grid.RowSpan="2"/>
         <Button x:Name="buttonDeleteClient"  Content="Удалить клиента" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="150" Click="ButtonDeleteClientClick" Margin="25,0,0,12"/>
-        <Button x:Name="buttonUpdateClient"  Content="Обновить данные клиента" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="4" VerticalAlignment="Top" Width="150" Click="ButtonUpdateClientClick" Margin="25,0,0,13" Grid.RowSpan="2"/>
-        <Button x:Name="buttonLogin"  Content="Войти в систему" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="150" Click="ButtonLoginClick" Margin="25,0,0,13" Grid.RowSpan="2"/>
-        <Button x:Name="buttonLogout"  Content="Выйти из системы" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="6" Width="150" Click="ButtonLogoutClick" Margin="25,0,0,0" Height="20" VerticalAlignment="Top"/>
+        <Button x:Name="buttonLogin"  Content="Войти в систему" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="4" VerticalAlignment="Top" Width="150" Click="ButtonLoginClick" Margin="25,0,0,0"/>
+        <Button x:Name="buttonLogout"  Content="Выйти из системы" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="5" Width="150" Click="ButtonLogoutClick" Margin="25,0,0,0" Height="20" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

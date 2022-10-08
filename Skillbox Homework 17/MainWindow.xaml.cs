@@ -27,7 +27,9 @@ namespace Skillbox_Homework_17
     public partial class MainWindow : Window
     {
         Journal journalWindow;
+        AddClientWindow addClientWindow;
 
+        SqlConnection connectionLocalDB;
         SqlDataAdapter adapterLocalDB;
         DataRowView somerow;
         DataTable dataTableLocalDB;
@@ -63,34 +65,12 @@ namespace Skillbox_Homework_17
                 Pooling = true
             };
 
-            SqlConnection connectionLocalDB = new SqlConnection(connectionString.ConnectionString);
+            connectionLocalDB = new SqlConnection(connectionString.ConnectionString);
             adapterLocalDB = new SqlDataAdapter();
             dataTableLocalDB = new DataTable();
 
             string selectScript = @"SELECT * FROM localDBTable Order by localDBTable.ID";
-            adapterLocalDB.SelectCommand = new SqlCommand(selectScript, connectionLocalDB);
-
-            string insertScript = @"INSERT INTO localDBTable {Фамилия, Имя, Отчество, Номер_телефона, Email} VALUES {@Фамилия, @Имя, @Отчество, @Номер_телефона, @Email}; Set @ID = @@IDENTITY";
-            adapterLocalDB.InsertCommand = new SqlCommand(insertScript, connectionLocalDB);
-            adapterLocalDB.InsertCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").Direction = ParameterDirection.Output;
-            adapterLocalDB.InsertCommand.Parameters.Add("@Фамилия", SqlDbType.NVarChar,255, "Фамилия");
-            adapterLocalDB.InsertCommand.Parameters.Add("@Имя", SqlDbType.NVarChar, 255, "Имя");
-            adapterLocalDB.InsertCommand.Parameters.Add("@Отчество", SqlDbType.NVarChar, 255, "Отчество");
-            adapterLocalDB.InsertCommand.Parameters.Add("@Номер_телефона", SqlDbType.NVarChar, 255, "Номер_телефона");
-            adapterLocalDB.InsertCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 255, "Email");
-
-            string updateScript = @"UPDATE localDBTable SET Фамилия = @Фамилия, Имя = @Имя, Отчество = @Отчество, [Номер_телефона] = @Номер_телефона, Email = @Email WHERE ID = @ID";
-            adapterLocalDB.UpdateCommand = new SqlCommand(updateScript, connectionLocalDB);
-            adapterLocalDB.UpdateCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").SourceVersion = DataRowVersion.Original;
-            adapterLocalDB.UpdateCommand.Parameters.Add("@Фамилия", SqlDbType.NVarChar, 255, "Фамилия");
-            adapterLocalDB.UpdateCommand.Parameters.Add("@Имя", SqlDbType.NVarChar, 255, "Имя");
-            adapterLocalDB.UpdateCommand.Parameters.Add("@Отчество", SqlDbType.NVarChar, 255, "Отчество");
-            adapterLocalDB.UpdateCommand.Parameters.Add("@Номер_телефона", SqlDbType.NVarChar, 255, "Номер_телефона");
-            adapterLocalDB.UpdateCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 255, "Email");
-
-            string deleteScript = @"DELETE FROM localDBTable WHERE ID = @ID";
-            adapterLocalDB.DeleteCommand = new SqlCommand(deleteScript, connectionLocalDB);
-            adapterLocalDB.DeleteCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID");
+            adapterLocalDB.SelectCommand = new SqlCommand(selectScript, connectionLocalDB);                      
 
             adapterLocalDB.Fill(dataTableLocalDB);
             this.gridview.DataContext = dataTableLocalDB.DefaultView;
@@ -146,17 +126,52 @@ namespace Skillbox_Homework_17
 
         private void ButtonAddClientClick(object sender, RoutedEventArgs e)
         {
+            addClientWindow = new AddClientWindow();
+            addClientWindow.buttonAdd.Click += new RoutedEventHandler(AddClientWindowButtonAddPressed);
+            addClientWindow.Show();  
+        }
 
+        private void AddClientWindowButtonAddPressed(object sender, RoutedEventArgs e)
+        {
+            string insertScript = $@"INSERT INTO localDBTable (Фамилия, Имя, Отчество, Номер_телефона, Email) VALUES (@Фамилия,@Имя,@Отчество,@Номер_телефона,@Email); Set @ID = @@IDENTITY";
+            adapterLocalDB.InsertCommand = new SqlCommand(insertScript, connectionLocalDB);
+            adapterLocalDB.InsertCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").Direction = ParameterDirection.Output;
+
+            adapterLocalDB.InsertCommand.Parameters.AddWithValue("@Фамилия", $"{addClientWindow.textboxSecondName.Text}");
+            adapterLocalDB.InsertCommand.Parameters.AddWithValue("@Имя", $"{addClientWindow.textboxFirstName.Text}");
+            adapterLocalDB.InsertCommand.Parameters.AddWithValue("@Отчество", $"{addClientWindow.textboxPatronymic.Text}");
+            adapterLocalDB.InsertCommand.Parameters.AddWithValue("@Номер_телефона", $"{addClientWindow.textboxNumber.Text}");
+            adapterLocalDB.InsertCommand.Parameters.AddWithValue("@Email", $"{addClientWindow.textboxEmail.Text}");
+
+            connectionLocalDB.Open();
+
+            adapterLocalDB.InsertCommand.ExecuteNonQuery();
+            UpdateGridView();
+
+            connectionLocalDB.Close();
+
+            addClientWindow.Close();
         }
 
         private void ButtonDeleteClientClick(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                var something = (DataRowView)gridview.SelectedItem;
 
-        }
+                string deleteScript = @"DELETE FROM localDBTable WHERE ID = @ID";
+                adapterLocalDB.DeleteCommand = new SqlCommand(deleteScript, connectionLocalDB);
+                adapterLocalDB.DeleteCommand.Parameters.AddWithValue("@ID", something.Row.Field<int>("ID"));
 
-        private void ButtonUpdateClientClick(object sender, RoutedEventArgs e)
-        {
-
+                connectionLocalDB.Open();
+                adapterLocalDB.DeleteCommand.ExecuteNonQuery();
+                UpdateGridView();
+                connectionLocalDB.Close();
+            }
+            catch(Exception error)
+            {
+                MessageBox.Show($"Выберите клиента {error.Message}");
+            }
         }
 
         private void ButtonLoginClick(object sender, RoutedEventArgs e)
@@ -209,6 +224,10 @@ namespace Skillbox_Homework_17
             }
         }
 
-
+        private void UpdateGridView()
+        {
+            dataTableLocalDB.Clear();
+            adapterLocalDB.Fill(dataTableLocalDB);
+        }
     }
 }
