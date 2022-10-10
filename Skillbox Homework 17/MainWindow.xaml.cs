@@ -210,7 +210,29 @@ namespace Skillbox_Homework_17
             var something = (DataRowView)gridview.SelectedItem;
             purchasesWindow = new PurchasesWindow();
             ConnectMSAccess(something.Row.Field<string>("Email"));
+            purchasesWindow.deleteItem.Click += new RoutedEventHandler(PurchaseWindowDeleteItemClicked);
             purchasesWindow.Show();
+        }
+
+        private void PurchaseWindowDeleteItemClicked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var something = (DataRowView)purchasesWindow.gridview.SelectedItem;
+
+                string deleteScript = @"DELETE FROM Таблица1 WHERE ID = @ID";
+                oledbAdapter.DeleteCommand = new OleDbCommand(deleteScript, oledbConnection);
+                oledbAdapter.DeleteCommand.Parameters.AddWithValue("@ID", something.Row.Field<int>("ID"));
+
+                oledbConnection.Open();
+                oledbAdapter.DeleteCommand.ExecuteNonQuery();
+                PurchaseWindowUpdateTable(something.Row.Field<string>("Email"));
+                oledbConnection.Close();
+            }
+            catch(Exception error)
+            {
+                MessageBox.Show($"Выберите клиента {error.Message}");
+            }
         }
 
         private void MenuitemAddClick(object sender, RoutedEventArgs e)
