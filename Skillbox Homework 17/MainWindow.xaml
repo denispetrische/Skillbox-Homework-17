@@ -48,8 +48,6 @@
                 <ContextMenu>
                     <MenuItem Header="Показать товары" Click="MenuitemShowClick"/>
                     <MenuItem Header="Добавить товар" Click="MenuitemAddClick"/>
-                    <MenuItem Header="Удалить товар" Click="MenuitemDeleteClick"/>
-                    <MenuItem Header="Изменить описание товара" Click="MenuitemUpdateClick"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

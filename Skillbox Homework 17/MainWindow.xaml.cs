@@ -28,11 +28,16 @@ namespace Skillbox_Homework_17
     {
         Journal journalWindow;
         AddClientWindow addClientWindow;
+        PurchasesWindow purchasesWindow;
 
         SqlConnection connectionLocalDB;
         SqlDataAdapter adapterLocalDB;
         DataRowView somerow;
         DataTable dataTableLocalDB;
+
+        OleDbConnection oledbConnection;
+        OleDbDataAdapter oledbAdapter;
+        DataTable oledbDataTable;
 
         public delegate void InformationHandler(string message);
         public static event InformationHandler? Notify;
@@ -91,16 +96,28 @@ namespace Skillbox_Homework_17
             }
         }
 
-        private void ConnectMSAccess()
+        private void ConnectMSAccess(string email)
         {
             string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\Bases\Database1.accdb";
-            OleDbConnection connectionMSAccess = new OleDbConnection(connectionString);
+            oledbConnection = new OleDbConnection(connectionString);
 
-            connectionMSAccess.StateChange += (s,e) => { Notify?.Invoke($"{nameof(connectionMSAccess)} has changed state to: {(s as OleDbConnection).State}"); };
+            oledbAdapter = new OleDbDataAdapter();
+            oledbDataTable = new DataTable();
+
+            string selectScript = @"SELECT * FROM Таблица1 Where Email = @Email";
+            oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
+            oledbAdapter.SelectCommand.Parameters.Add("@Email", email);
+
+
+
+            oledbAdapter.Fill(oledbDataTable);
+            purchasesWindow.gridview.DataContext = oledbDataTable.DefaultView;
+
+            oledbConnection.StateChange += (s,e) => { Notify?.Invoke($"{nameof(oledbConnection)} has changed state to: {(s as OleDbConnection).State}"); };
          
             try
             {
-                connectionMSAccess.Open();
+                oledbConnection.Open();
             }
             catch (Exception e)
             {
@@ -108,7 +125,7 @@ namespace Skillbox_Homework_17
             }
             finally
             {
-                connectionMSAccess.Close();
+                oledbConnection.Close();
             }
         }
 
@@ -186,20 +203,13 @@ namespace Skillbox_Homework_17
 
         private void MenuitemShowClick(object sender, RoutedEventArgs e)
         {
-
+            var something = (DataRowView)gridview.SelectedItem;
+            purchasesWindow = new PurchasesWindow();
+            ConnectMSAccess(something.Row.Field<string>("Email"));
+            purchasesWindow.Show();
         }
 
         private void MenuitemAddClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void MenuitemDeleteClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void MenuitemUpdateClick(object sender, RoutedEventArgs e)
         {
 
         }
