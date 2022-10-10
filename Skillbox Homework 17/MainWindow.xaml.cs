@@ -29,6 +29,7 @@ namespace Skillbox_Homework_17
         Journal journalWindow;
         AddClientWindow addClientWindow;
         PurchasesWindow purchasesWindow;
+        AddPurchaseWindow addPurchaseWindow;
 
         SqlConnection connectionLocalDB;
         SqlDataAdapter adapterLocalDB;
@@ -37,7 +38,7 @@ namespace Skillbox_Homework_17
 
         OleDbConnection oledbConnection;
         OleDbDataAdapter oledbAdapter;
-        DataTable oledbDataTable;
+        DataTable oledbDataTable = new DataTable();
 
         public delegate void InformationHandler(string message);
         public static event InformationHandler? Notify;
@@ -150,6 +151,9 @@ namespace Skillbox_Homework_17
 
         private void AddClientWindowButtonAddPressed(object sender, RoutedEventArgs e)
         {
+            var something = (DataRowView)gridview.SelectedItem;
+            ConnectMSAccess(something.Row.Field<string>("Email"));
+
             string insertScript = $@"INSERT INTO localDBTable (Фамилия, Имя, Отчество, Номер_телефона, Email) VALUES (@Фамилия,@Имя,@Отчество,@Номер_телефона,@Email); Set @ID = @@IDENTITY";
             adapterLocalDB.InsertCommand = new SqlCommand(insertScript, connectionLocalDB);
             adapterLocalDB.InsertCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").Direction = ParameterDirection.Output;
@@ -211,7 +215,30 @@ namespace Skillbox_Homework_17
 
         private void MenuitemAddClick(object sender, RoutedEventArgs e)
         {
+            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\Bases\Database1.accdb";
+            oledbConnection = new OleDbConnection(connectionString);
+            oledbAdapter = new OleDbDataAdapter();
 
+            addPurchaseWindow = new AddPurchaseWindow();
+            addPurchaseWindow.buttonAddPurchase.Click += new RoutedEventHandler(ButtonAddPurchaseClick);
+            addPurchaseWindow.Show();
+        }
+
+        private void ButtonAddPurchaseClick(object sender, RoutedEventArgs e)
+        {
+            var something = (DataRowView)gridview.SelectedItem;
+            string insertScript = "INSERT INTO Таблица1(EMAIL,[Код товара],[Наименование товара]) VALUES (@EMAIL, [@Код товара], [@Наименование товара])";
+            oledbAdapter.InsertCommand = new OleDbCommand(insertScript, oledbConnection);
+            oledbAdapter.InsertCommand.Parameters.AddWithValue("@EMAIL", something.Row.Field<string>("Email"));
+            oledbAdapter.InsertCommand.Parameters.AddWithValue("[@Код товара]", addPurchaseWindow.textboxPurchaseCode.Text);
+            oledbAdapter.InsertCommand.Parameters.AddWithValue("[@Наименование товара]", addPurchaseWindow.textboxPurchaseName.Text);
+
+            oledbConnection.Open();
+            oledbAdapter.InsertCommand.ExecuteNonQuery();
+            PurchaseWindowUpdateTable(something.Row.Field<string>("Email"));
+            oledbConnection.Close();
+
+            addPurchaseWindow.Close();
         }
 
         private void CellEndEditing(object sender, DataGridCellEditEndingEventArgs e)
@@ -238,6 +265,15 @@ namespace Skillbox_Homework_17
         {
             dataTableLocalDB.Clear();
             adapterLocalDB.Fill(dataTableLocalDB);
+        }
+
+        private void PurchaseWindowUpdateTable(string email)
+        {
+            string selectScript = @"SELECT * FROM Таблица1 Where Email = @Email";
+            oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
+            oledbAdapter.SelectCommand.Parameters.Add("@Email", email);
+            oledbDataTable.Clear();
+            oledbAdapter.Fill(oledbDataTable);
         }
     }
 }
