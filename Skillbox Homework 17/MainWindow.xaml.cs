@@ -38,6 +38,7 @@ namespace Skillbox_Homework_17
 
         OleDbConnection oledbConnection;
         OleDbDataAdapter oledbAdapter;
+        DataRowView purchaseWindowSomerow;
         DataTable oledbDataTable = new DataTable();
 
         public delegate void InformationHandler(string message);
@@ -76,7 +77,16 @@ namespace Skillbox_Homework_17
             dataTableLocalDB = new DataTable();
 
             string selectScript = @"SELECT * FROM localDBTable Order by localDBTable.ID";
-            adapterLocalDB.SelectCommand = new SqlCommand(selectScript, connectionLocalDB);                      
+            adapterLocalDB.SelectCommand = new SqlCommand(selectScript, connectionLocalDB);
+
+            string updateScript = @"UPDATE localDBTable SET Фамилия = @Фамилия, Имя = @Имя, Отчество = @Отчество, Номер_телефона = @Номер_телефона, Email = @Email WHERE ID = @ID";
+            adapterLocalDB.UpdateCommand = new SqlCommand(updateScript, connectionLocalDB);
+            adapterLocalDB.UpdateCommand.Parameters.Add("@ID", SqlDbType.Int, 4, "ID").SourceVersion = DataRowVersion.Original;
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Фамилия", SqlDbType.NVarChar, 255, "Фамилия");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Имя", SqlDbType.NVarChar, 255, "Имя");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Отчество", SqlDbType.NVarChar, 255, "Отчество");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Номер_телефона", SqlDbType.NVarChar, 255, "Номер_телефона");
+            adapterLocalDB.UpdateCommand.Parameters.Add("@Email", SqlDbType.NVarChar, 255, "Email");
 
             adapterLocalDB.Fill(dataTableLocalDB);
             this.gridview.DataContext = dataTableLocalDB.DefaultView;
@@ -109,7 +119,12 @@ namespace Skillbox_Homework_17
             oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
             oledbAdapter.SelectCommand.Parameters.Add("@Email", email);
 
-
+            string updateScript = @"UPDATE Таблица1 SET EMAIL = @EMAIL, [Код товара] = [@Код товара], [Наименование товара] = [@Наименование товара] WHERE ID = @ID";
+            oledbAdapter.UpdateCommand = new OleDbCommand(updateScript, oledbConnection);
+            oledbAdapter.UpdateCommand.Parameters.Add("@ID", OleDbType.Integer, 10, "ID").SourceVersion = DataRowVersion.Original;
+            oledbAdapter.UpdateCommand.Parameters.Add("@EMAIL", OleDbType.WChar, 255, "EMAIL").SourceVersion = DataRowVersion.Original;
+            oledbAdapter.UpdateCommand.Parameters.Add("[@Код товара]", OleDbType.WChar, 255, "Код товара").SourceVersion = DataRowVersion.Original;
+            oledbAdapter.UpdateCommand.Parameters.Add("[@Наименование товара]", OleDbType.WChar, 255, "Наименование товара").SourceVersion = DataRowVersion.Original;
 
             oledbAdapter.Fill(oledbDataTable);
             purchasesWindow.gridview.DataContext = oledbDataTable.DefaultView;
@@ -211,6 +226,8 @@ namespace Skillbox_Homework_17
             purchasesWindow = new PurchasesWindow();
             ConnectMSAccess(something.Row.Field<string>("Email"));
             purchasesWindow.deleteItem.Click += new RoutedEventHandler(PurchaseWindowDeleteItemClicked);
+            purchasesWindow.gridview.CellEditEnding += (s,e) => { PurchaseWindowCellEndEditing(s, e); };
+            purchasesWindow.gridview.CurrentCellChanged += (s, e) => { PurchaseWindowCurrentCellChanged(s, e); };
             purchasesWindow.Show();
         }
 
@@ -296,6 +313,35 @@ namespace Skillbox_Homework_17
             oledbAdapter.SelectCommand.Parameters.Add("@Email", email);
             oledbDataTable.Clear();
             oledbAdapter.Fill(oledbDataTable);
+        }
+
+        private void PurchaseWindowCellEndEditing(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            purchaseWindowSomerow = (DataRowView)purchasesWindow.gridview.SelectedItem;
+
+            purchaseWindowSomerow.BeginEdit();
+        }
+
+        private void PurchaseWindowCurrentCellChanged(object sender, EventArgs e)
+        {
+            if (purchaseWindowSomerow == null)
+            {
+                return;
+            }
+            else
+            {
+                purchaseWindowSomerow.EndEdit();
+                oledbAdapter.RowUpdated += new OleDbRowUpdatedEventHandler(OnRowUpdated);
+                oledbAdapter.Update(oledbDataTable);             
+            }
+        }
+
+        private void OnRowUpdated(object sender, OleDbRowUpdatedEventArgs e)
+        {
+            if (e.RecordsAffected == 0)
+            {
+                e.Status = UpdateStatus.Continue;
+            }
         }
     }
 }
