@@ -32,9 +32,9 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding EMAIL}"/>
-                <DataGridTextColumn Header="Код товара" Binding="{Binding [Код товара]}"/>
-                <DataGridTextColumn Header="Название товара" Binding="{Binding [Наименование товара]}"/>
+                <DataGridTextColumn Header="EMAIL" Binding="{Binding EMAIL}"/>
+                <DataGridTextColumn Header="CODE" Binding="{Binding CODE}"/>
+                <DataGridTextColumn Header="PURCHASE_NAME" Binding="{Binding PURCHASE_NAME}"/>
             </DataGrid.Columns> 
             
         </DataGrid>

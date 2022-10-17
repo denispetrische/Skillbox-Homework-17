@@ -30,6 +30,7 @@ namespace Skillbox_Homework_17
         AddClientWindow addClientWindow;
         PurchasesWindow purchasesWindow;
         AddPurchaseWindow addPurchaseWindow;
+        AuthorisationWindow authorisationWindow;
 
         SqlConnection connectionLocalDB;
         SqlDataAdapter adapterLocalDB;
@@ -56,21 +57,20 @@ namespace Skillbox_Homework_17
         private void Preset()
         {
             Notify += AddJournalString;
-
-            ConnectLocalDB();
         }
 
-        private void ConnectLocalDB()
+        private void ConnectLocalDB(string login, string password)
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder()
             {
                 DataSource = @"(localdb)\MSSQLLocalDB",
                 InitialCatalog = "localBase",
-                IntegratedSecurity = true,
-                UserID = "admin",
-                Password = "admin",
+                IntegratedSecurity = false,
                 Pooling = true
             };
+
+            connectionString.UserID = login;
+            connectionString.Password = password;
 
             connectionLocalDB = new SqlConnection(connectionString.ConnectionString);
             adapterLocalDB = new SqlDataAdapter();
@@ -115,16 +115,22 @@ namespace Skillbox_Homework_17
             oledbAdapter = new OleDbDataAdapter();
             oledbDataTable = new DataTable();
 
-            string selectScript = @"SELECT * FROM Таблица1 Where Email = @Email";
-            oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
-            oledbAdapter.SelectCommand.Parameters.Add("@Email", email);
+            OleDbCommandBuilder commandBuilder = new OleDbCommandBuilder(oledbAdapter);
 
-            string updateScript = @"UPDATE Таблица1 SET EMAIL = @EMAIL, [Код товара] = [@Код товара], [Наименование товара] = [@Наименование товара] WHERE ID = @ID";
-            oledbAdapter.UpdateCommand = new OleDbCommand(updateScript, oledbConnection);
-            oledbAdapter.UpdateCommand.Parameters.Add("@ID", OleDbType.Integer, 10, "ID").SourceVersion = DataRowVersion.Original;
-            oledbAdapter.UpdateCommand.Parameters.Add("@EMAIL", OleDbType.WChar, 255, "EMAIL").SourceVersion = DataRowVersion.Original;
-            oledbAdapter.UpdateCommand.Parameters.Add("[@Код товара]", OleDbType.WChar, 255, "Код товара").SourceVersion = DataRowVersion.Original;
-            oledbAdapter.UpdateCommand.Parameters.Add("[@Наименование товара]", OleDbType.WChar, 255, "Наименование товара").SourceVersion = DataRowVersion.Original;
+            string selectScript = @"SELECT * FROM Таблица1";
+            oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
+            commandBuilder.GetUpdateCommand();
+
+            selectScript = @"SELECT * FROM Таблица1 Where Email = @EMAIL";
+            oledbAdapter.SelectCommand = new OleDbCommand(selectScript, oledbConnection);
+            oledbAdapter.SelectCommand.Parameters.Add("@EMAIL", email);
+
+            //string updateScript = @"UPDATE Таблица1 SET EMAIL = @EMAIL, CODE = @CODE, PURCHASE_NAME = @PURCHASE_NAME WHERE ID = @ID";
+            //oledbAdapter.UpdateCommand = new OleDbCommand(updateScript, oledbConnection);
+            //oledbAdapter.UpdateCommand.Parameters.Add("@ID", OleDbType.Integer, 10, "ID").SourceVersion = DataRowVersion.Current;
+            //oledbAdapter.UpdateCommand.Parameters.Add("@EMAIL", OleDbType.WChar, 255, "EMAIL");
+            //oledbAdapter.UpdateCommand.Parameters.Add("@CODE", OleDbType.WChar, 255, "CODE");
+            //oledbAdapter.UpdateCommand.Parameters.Add("@PURCHASE_NAME", OleDbType.WChar, 255, "PURCHASE_NAME");
 
             oledbAdapter.Fill(oledbDataTable);
             purchasesWindow.gridview.DataContext = oledbDataTable.DefaultView;
@@ -159,9 +165,16 @@ namespace Skillbox_Homework_17
 
         private void ButtonAddClientClick(object sender, RoutedEventArgs e)
         {
-            addClientWindow = new AddClientWindow();
-            addClientWindow.buttonAdd.Click += new RoutedEventHandler(AddClientWindowButtonAddPressed);
-            addClientWindow.Show();  
+            if (connectionLocalDB.ConnectionString == null)
+            {
+                MessageBox.Show("Нет подключения к таблице");
+            }
+            else
+            {
+                addClientWindow = new AddClientWindow();
+                addClientWindow.buttonAdd.Click += new RoutedEventHandler(AddClientWindowButtonAddPressed);
+                addClientWindow.Show();
+            }
         }
 
         private void AddClientWindowButtonAddPressed(object sender, RoutedEventArgs e)
@@ -212,23 +225,47 @@ namespace Skillbox_Homework_17
 
         private void ButtonLoginClick(object sender, RoutedEventArgs e)
         {
+            authorisationWindow = new AuthorisationWindow();
+            authorisationWindow.buttonLogin.Click += new RoutedEventHandler(AuthorisationWindowButtonLoginClick);
+            authorisationWindow.Show();
+        }
 
+        private void AuthorisationWindowButtonLoginClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ConnectLocalDB(authorisationWindow.textboxLogin.Text, authorisationWindow.textboxPassword.Text);
+                authorisationWindow.Close();
+            }
+            catch
+            {
+                MessageBox.Show("Неверный логин или пароль");
+            }
         }
 
         private void ButtonLogoutClick(object sender, RoutedEventArgs e)
         {
-
+            connectionLocalDB.ConnectionString = null;
+            dataTableLocalDB.Clear();
         }
 
         private void MenuitemShowClick(object sender, RoutedEventArgs e)
         {
             var something = (DataRowView)gridview.SelectedItem;
-            purchasesWindow = new PurchasesWindow();
-            ConnectMSAccess(something.Row.Field<string>("Email"));
-            purchasesWindow.deleteItem.Click += new RoutedEventHandler(PurchaseWindowDeleteItemClicked);
-            purchasesWindow.gridview.CellEditEnding += (s,e) => { PurchaseWindowCellEndEditing(s, e); };
-            purchasesWindow.gridview.CurrentCellChanged += (s, e) => { PurchaseWindowCurrentCellChanged(s, e); };
-            purchasesWindow.Show();
+
+            if (something == null)
+            {
+                MessageBox.Show("Выберите пользователя");
+            }
+            else
+            {
+                purchasesWindow = new PurchasesWindow();
+                ConnectMSAccess(something.Row.Field<string>("Email"));
+                purchasesWindow.deleteItem.Click += new RoutedEventHandler(PurchaseWindowDeleteItemClicked);
+                purchasesWindow.gridview.CellEditEnding += (s, e) => { PurchaseWindowCellEndEditing(s, e); };
+                purchasesWindow.gridview.CurrentCellChanged += (s, e) => { PurchaseWindowCurrentCellChanged(s, e); };
+                purchasesWindow.Show();
+            }
         }
 
         private void PurchaseWindowDeleteItemClicked(object sender, RoutedEventArgs e)
@@ -254,23 +291,32 @@ namespace Skillbox_Homework_17
 
         private void MenuitemAddClick(object sender, RoutedEventArgs e)
         {
-            string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\Bases\Database1.accdb";
-            oledbConnection = new OleDbConnection(connectionString);
-            oledbAdapter = new OleDbDataAdapter();
+            var something = (DataRowView)gridview.SelectedItem;
 
-            addPurchaseWindow = new AddPurchaseWindow();
-            addPurchaseWindow.buttonAddPurchase.Click += new RoutedEventHandler(ButtonAddPurchaseClick);
-            addPurchaseWindow.Show();
+            if (something == null)
+            {
+                MessageBox.Show("Выберите пользователя");
+            }
+            else
+            {
+                string connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\LENOVO\source\repos\Skillbox Homework 17\Skillbox Homework 17\Bases\Database1.accdb";
+                oledbConnection = new OleDbConnection(connectionString);
+                oledbAdapter = new OleDbDataAdapter();
+
+                addPurchaseWindow = new AddPurchaseWindow();
+                addPurchaseWindow.buttonAddPurchase.Click += new RoutedEventHandler(ButtonAddPurchaseClick);
+                addPurchaseWindow.Show();
+            }
         }
 
         private void ButtonAddPurchaseClick(object sender, RoutedEventArgs e)
         {
             var something = (DataRowView)gridview.SelectedItem;
-            string insertScript = "INSERT INTO Таблица1(EMAIL,[Код товара],[Наименование товара]) VALUES (@EMAIL, [@Код товара], [@Наименование товара])";
+            string insertScript = "INSERT INTO Таблица1(EMAIL,CODE,PURCHASE_NAME) VALUES (@EMAIL, @CODE, @PURCHASE_NAME)";
             oledbAdapter.InsertCommand = new OleDbCommand(insertScript, oledbConnection);
             oledbAdapter.InsertCommand.Parameters.AddWithValue("@EMAIL", something.Row.Field<string>("Email"));
-            oledbAdapter.InsertCommand.Parameters.AddWithValue("[@Код товара]", addPurchaseWindow.textboxPurchaseCode.Text);
-            oledbAdapter.InsertCommand.Parameters.AddWithValue("[@Наименование товара]", addPurchaseWindow.textboxPurchaseName.Text);
+            oledbAdapter.InsertCommand.Parameters.AddWithValue("@CODE", addPurchaseWindow.textboxPurchaseCode.Text);
+            oledbAdapter.InsertCommand.Parameters.AddWithValue("@PURCHASE_NAME", addPurchaseWindow.textboxPurchaseName.Text);
 
             oledbConnection.Open();
             oledbAdapter.InsertCommand.ExecuteNonQuery();
@@ -319,7 +365,7 @@ namespace Skillbox_Homework_17
         {
             purchaseWindowSomerow = (DataRowView)purchasesWindow.gridview.SelectedItem;
 
-            purchaseWindowSomerow.BeginEdit();
+            purchaseWindowSomerow.BeginEdit();            
         }
 
         private void PurchaseWindowCurrentCellChanged(object sender, EventArgs e)
@@ -330,18 +376,14 @@ namespace Skillbox_Homework_17
             }
             else
             {
+                var something = (DataRowView)gridview.SelectedItem;
+
                 purchaseWindowSomerow.EndEdit();
-                oledbAdapter.RowUpdated += new OleDbRowUpdatedEventHandler(OnRowUpdated);
-                oledbAdapter.Update(oledbDataTable);             
+                
+                oledbAdapter.Update(oledbDataTable);
             }
         }
 
-        private void OnRowUpdated(object sender, OleDbRowUpdatedEventArgs e)
-        {
-            if (e.RecordsAffected == 0)
-            {
-                e.Status = UpdateStatus.Continue;
-            }
-        }
+       
     }
 }

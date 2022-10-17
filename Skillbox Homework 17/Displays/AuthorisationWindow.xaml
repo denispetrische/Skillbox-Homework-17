@@ -21,8 +21,8 @@
             <ColumnDefinition Width="227*"/>
             <ColumnDefinition Width="35*"/>
         </Grid.ColumnDefinitions>
-        <TextBox Name="textboxLogin" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="1" Text="" TextWrapping="Wrap" VerticalAlignment="Center" Width="230" Height="30"/>
-        <TextBox Name="textboxPassword" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="2" Text="" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="230" Height="30" Grid.RowSpan="2"/>
+        <TextBox Name="textboxLogin" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="1" Text="" TextWrapping="Wrap" VerticalAlignment="Center" Width="194" Height="21"/>
+        <TextBox Name="textboxPassword" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="3" Text="" TextWrapping="Wrap" VerticalAlignment="Center" Width="194" Height="20"/>
         <Button Name="buttonLogin" Content="Войти" HorizontalAlignment="Center" Grid.Row="5" VerticalAlignment="Center" Height="29" Grid.Column="1" Width="230"/>
         <TextBlock HorizontalAlignment="Left" Margin="35,19,0,30" Text="Логин:" TextWrapping="Wrap" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
         <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="0,0,0,0" Grid.Row="2" Text="Пароль:" TextWrapping="Wrap" VerticalAlignment="Bottom"/>
