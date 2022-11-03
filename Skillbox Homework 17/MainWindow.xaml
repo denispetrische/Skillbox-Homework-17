@@ -36,11 +36,11 @@
                   CurrentCellChanged="CurrentCellChanged">
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
-                <DataGridTextColumn Header="Фамилия" Binding="{Binding Фамилия}"/>
-                <DataGridTextColumn Header="Имя" Binding="{Binding Имя}"/>
-                <DataGridTextColumn Header="Отчество" Binding="{Binding Отчество}"/>
-                <DataGridTextColumn Header="Телефон" Binding="{Binding [Номер_телефона]}"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="Фамилия" Binding="{Binding SecondName}"/>
+                <DataGridTextColumn Header="Имя" Binding="{Binding FirstName}"/>
+                <DataGridTextColumn Header="Отчество" Binding="{Binding Patronymic}"/>
+                <DataGridTextColumn Header="Телефон" Binding="{Binding PhoneNumber}"/>
                 <DataGridTextColumn Header="Email" Binding="{Binding Email}"/>
             </DataGrid.Columns>
 
