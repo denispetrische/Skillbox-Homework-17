@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-#nullable disable
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
 
-namespace Skillbox_Homework_17
+namespace Skillbox_Homework_17.SQL_Server
 {
     public partial class localBaseContext : DbContext
     {
@@ -17,24 +19,21 @@ namespace Skillbox_Homework_17
         {
         }
 
-        public virtual DbSet<ClassLocalDb> ClassLocalDbs { get; set; }
-        public virtual DbSet<LocalDbtable> LocalDbtables { get; set; }
-        public virtual DbSet<MigrationHistory> MigrationHistories { get; set; }
+        public virtual DbSet<ClassLocalDbs> ClassLocalDbs { get; set; }
+        public virtual DbSet<LocalDbtable> LocalDbtable { get; set; }
+        public virtual DbSet<MigrationHistory> MigrationHistory { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=localBase;User ID=qwerty;Password=12345;Trusted_Connection=false;");
+                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=localBase;");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
-
-            modelBuilder.Entity<ClassLocalDb>(entity =>
+            modelBuilder.Entity<ClassLocalDbs>(entity =>
             {
                 entity.ToTable("ClassLocalDBs");
 
@@ -43,7 +42,7 @@ namespace Skillbox_Homework_17
 
             modelBuilder.Entity<LocalDbtable>(entity =>
             {
-                entity.HasNoKey();
+                //entity.HasNoKey();
 
                 entity.ToTable("localDBTable");
 
@@ -52,16 +51,16 @@ namespace Skillbox_Homework_17
                     .HasMaxLength(255);
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Имя)
                     .IsRequired()
                     .HasMaxLength(255);
 
                 entity.Property(e => e.НомерТелефона)
-                    .HasMaxLength(255)
-                    .HasColumnName("Номер_телефона");
+                    .HasColumnName("Номер_телефона")
+                    .HasMaxLength(255);
 
                 entity.Property(e => e.Отчество)
                     .IsRequired()

@@ -22,8 +22,10 @@
                   SelectionMode="Single" 
                   AutoGenerateColumns="False"
                   ItemsSource="{Binding}"
-                Grid.Column="1" 
-                Grid.Row="1">
+                  Grid.Column="1" 
+                  Grid.Row="1"
+                  CanUserAddRows="False">
+            
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Name="deleteItem" Header="Удалить"/>
@@ -31,10 +33,10 @@
             </DataGrid.ContextMenu>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding ID}"/>
-                <DataGridTextColumn Header="EMAIL" Binding="{Binding EMAIL}"/>
-                <DataGridTextColumn Header="CODE" Binding="{Binding CODE}"/>
-                <DataGridTextColumn Header="PURCHASE_NAME" Binding="{Binding PURCHASE_NAME}"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
+                <DataGridTextColumn Header="EMAIL" Binding="{Binding Email}"/>
+                <DataGridTextColumn Header="CODE" Binding="{Binding Code}"/>
+                <DataGridTextColumn Header="PURCHASE_NAME" Binding="{Binding PurchaseName}"/>
             </DataGrid.Columns> 
             
         </DataGrid>

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
 
-namespace Skillbox_Homework_17
+namespace Skillbox_Homework_17.SQL_Server
 {
     public partial class MigrationHistory
     {
